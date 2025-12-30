@@ -1,1 +1,0 @@
-# Sondeneyisim.github.io

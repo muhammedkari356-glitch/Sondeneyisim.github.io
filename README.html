@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>İçimde Kalanlar</title>
+
+<style>
+    body {
+        background: #020202;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        animation: screenShake 0.15s infinite;
+    }
+
+    .shake {
+        font-size: 28px;
+        font-weight: bold;
+        color: #ff2a2a;
+        margin: 12px;
+        animation: textShakeHard 0.07s infinite;
+        text-align: center;
+        text-shadow: 0 0 12px red;
+    }
+
+    .sad {
+        font-size: 22px;
+        color: #e0e0e0;
+        margin: 6px;
+        animation: textShakeSoft 0.14s infinite;
+        opacity: 0.9;
+        text-align: center;
+    }
+
+    @keyframes textShakeHard {
+        0% { transform: translate(0,0); }
+        25% { transform: translate(-4px,3px); }
+        50% { transform: translate(4px,-3px); }
+        75% { transform: translate(-3px,-4px); }
+        100% { transform: translate(3px,4px); }
+    }
+
+    @keyframes textShakeSoft {
+        0% { transform: translate(0,0); }
+        50% { transform: translate(1px,-1px); }
+        100% { transform: translate(-1px,1px); }
+    }
+
+    @keyframes screenShake {
+        0% { transform: translate(0,0); }
+        50% { transform: translate(1px,-1px); }
+        100% { transform: translate(-1px,1px); }
+    }
+
+    @keyframes flicker {
+        0% { background:#020202; }
+        50% { background:#080808; }
+        100% { background:#020202; }
+    }
+
+    body::after {
+        content:"";
+        position:absolute;
+        inset:0;
+        background:black;
+        opacity:0.05;
+        animation: flicker 1.2s infinite;
+        pointer-events:none;
+    }
+
+    button {
+        position: absolute;
+        bottom: 20px;
+        padding: 12px 20px;
+        background: black;
+        color: #ff3b3b;
+        border: 1px solid #ff3b3b;
+        font-size: 15px;
+        cursor: pointer;
+        z-index:10;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="shake">BEN OYUN OYNAMAK İSTEMİYORUM</div>
+<div class="shake">BEN ÜRETMEK İSTİYORUM</div>
+
+<div class="sad">Saatlerce uğraştım</div>
+<div class="sad">Tablet yetmedi</div>
+<div class="sad">Bilgisayar var ama izin yok</div>
+
+<div class="shake">BU ÇOK CAN SIKIYOR</div>
+<div class="shake">BU BENİ ÜZÜYOR</div>
+
+<div class="sad">Sadece bir şans istedim</div>
+<div class="sad">Sadece denemek istedim</div>
+
+<button onclick="startAll()">BAŞLAT</button>
+
+<script>
+let started = false;
+
+// Yazıları okuyacak metinler
+const texts = [
+    "Ben oyun oynamak istemiyorum",
+    "Ben üretmek istiyorum",
+    "Saatlerce uğraştım",
+    "Tablet yetmedi",
+    "Bilgisayar var ama izin yok",
+    "Bu beni üzüyor",
+    "Sadece bir şans istedim"
+];
+
+function startAll() {
+    if (started) return;
+    started = true;
+
+    startAmbient();
+    speakTexts();
+}
+
+// KORKUTUCU UĞULTU
+function startAmbient() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.value = 36;
+    gain.gain.value = 0.015;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+
+    setInterval(()=>{
+        gain.gain.setTargetAtTime(Math.random()*0.04, ctx.currentTime, 0.6);
+        osc.frequency.setTargetAtTime(30 + Math.random()*10, ctx.currentTime, 0.6);
+    }, 700);
+}
+
+// TITREYEN OKUYAN SES
+function speakTexts() {
+    let i = 0;
+
+    function speakNext() {
+        if (i >= texts.length) return;
+
+        const utter = new SpeechSynthesisUtterance(texts[i]);
+        utter.lang = "tr-TR";
+
+        // titrek / huzursuz ses
+        utter.rate = 0.7 + Math.random() * 0.2;
+        utter.pitch = 0.6 + Math.random() * 0.3;
+        utter.volume = 0.9;
+
+        utter.onend = () => {
+            i++;
+            setTimeout(speakNext, 600);
+        };
+
+        speechSynthesis.speak(utter);
+    }
+
+    speakNext();
+}
+</script>
+
+</body>
+</html>
